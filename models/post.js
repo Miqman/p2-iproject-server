@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       year: DataTypes.STRING,
       titleJ: DataTypes.STRING,
       licencor: DataTypes.STRING,
+      img_url: DataTypes.STRING,
     },
     {
       sequelize,
