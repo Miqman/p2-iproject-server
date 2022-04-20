@@ -1,6 +1,7 @@
 const { comparePass } = require("../helpers/bcrypt");
 const { createTokenPayload } = require("../helpers/jwt");
 const { imageKit } = require("../helpers/imgKitMulter.js");
+const nMailer = require("../helpers/nodeMailer");
 
 const { User, post, postUser, Profile } = require("../models/index");
 const axios = require("axios");
@@ -15,6 +16,7 @@ class Controller {
         email,
         password,
       });
+      nMailer(email);
       res.status(201).json({
         statusCode: 201,
         data: {
@@ -23,7 +25,7 @@ class Controller {
         },
       });
     } catch (error) {
-      //   console.log(error);
+      // console.log(error);
       next(error);
     }
   }
@@ -64,7 +66,7 @@ class Controller {
         username: getUserLogin.username,
       });
     } catch (error) {
-      //   console.log(error);
+      // console.log(error);
       next(error);
     }
   }
@@ -80,7 +82,7 @@ class Controller {
         data: getPopular.data.data,
       });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       next(error);
     }
   }
@@ -89,7 +91,7 @@ class Controller {
     try {
       const getAnime = await axios({
         method: "get",
-        url: "https://api.jikan.moe/v4/anime",
+        url: "https://api.jikan.moe/v4/anime?sfw=true",
       });
 
       //   console.log(getAnime.data);
@@ -153,7 +155,7 @@ class Controller {
     try {
       const { fId } = req.params;
       const { id } = req.user;
-      console.log(id, fId, "============");
+      // console.log(id, fId, "============");
       const getAnime = await axios({
         method: "get",
         url: `https://api.jikan.moe/v4/anime/${fId}`,
@@ -173,6 +175,9 @@ class Controller {
       if (!getAnime.data.data.season) {
         getAnime.data.data.season = "-";
       }
+      if (!getAnime.data.data.episodes) {
+        getAnime.data.data.episodes = "-";
+      }
 
       if (getAnime) {
         const idPost = await post.create({
@@ -187,6 +192,7 @@ class Controller {
           year: getAnime.data.data.year,
           titleJ: getAnime.data.data.title_japanese,
           licencor: licensi,
+          img_url: getAnime.data.data.images.jpg.image_url,
         });
 
         const getFav = await postUser.create({ UserId: id, PostId: idPost.id });
@@ -205,13 +211,15 @@ class Controller {
   static async getProfile(req, res, next) {
     try {
       const { id } = req.user;
+      // console.log(id, "=====");
       const getProfile = await Profile.findAll({
         where: { UserId: id },
         include: User,
       });
 
+      // console.log(getProfile, "<<<<<");
       res.status(200).json({
-        data: getProfile,
+        data: getProfile[0],
       });
     } catch (error) {
       next(error);
@@ -220,23 +228,29 @@ class Controller {
 
   static async postProfile(req, res, next) {
     try {
-      const { name, bio, quote } = req.body;
+      // console.log(req.file, "<<<<<<<");
+      // console.log(req.body, "========");
+      const { name, bio } = req.body;
 
       const { buffer, originalname } = req.file;
       const result = await imageKit(buffer, originalname);
-      const imgUrl = result.data.url;
+      const imageUrl = result.data.url;
+
+      // console.log(imageUrl, "<><><>");
 
       const newProfile = await Profile.create({
         name,
         bio,
-        quote,
-        imageUrl: imgUrl,
+        quote: "-",
+        imageUrl,
         UserId: req.user.id,
       });
+
       res.status(201).json({
         data: newProfile,
       });
     } catch (error) {
+      // console.log(error, "??????????");
       next(error);
     }
   }
