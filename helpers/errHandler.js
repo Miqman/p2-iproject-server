@@ -22,7 +22,7 @@ function errHandle(err, req, res, next) {
         message: "Invalid email/password",
       });
       break;
-    case "Data not found":
+    case "Not_Found":
       res.status(404).json({
         message: "Data Not found",
       });
