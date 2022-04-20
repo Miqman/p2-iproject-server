@@ -1,5 +1,7 @@
 const { comparePass } = require("../helpers/bcrypt");
 const { createTokenPayload } = require("../helpers/jwt");
+const { imageKit } = require("../helpers/imgKitMulter.js");
+
 const { User, post, postUser, Profile } = require("../models/index");
 const axios = require("axios");
 
@@ -196,6 +198,45 @@ class Controller {
       }
     } catch (error) {
       console.log(error);
+      next(error);
+    }
+  }
+
+  static async getProfile(req, res, next) {
+    try {
+      const { id } = req.user;
+      const getProfile = await Profile.findAll({
+        where: { UserId: id },
+        include: User,
+      });
+
+      res.status(200).json({
+        data: getProfile,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async postProfile(req, res, next) {
+    try {
+      const { name, bio, quote } = req.body;
+
+      const { buffer, originalname } = req.file;
+      const result = await imageKit(buffer, originalname);
+      const imgUrl = result.data.url;
+
+      const newProfile = await Profile.create({
+        name,
+        bio,
+        quote,
+        imageUrl: imgUrl,
+        UserId: req.user.id,
+      });
+      res.status(201).json({
+        data: newProfile,
+      });
+    } catch (error) {
       next(error);
     }
   }
