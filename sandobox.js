@@ -17,4 +17,4 @@ let coba = {};
 genres = genres.map((el) => el.name);
 coba = genres.join(", ");
 
-console.log(coba);
+// console.log(coba);
