@@ -89,17 +89,34 @@ class Controller {
 
   static async showAll(req, res, next) {
     try {
-      const getAnime = await axios({
+      let { q, page } = req.query;
+      let getAnime;
+      // console.log(q, "<<<<<<");
+
+      getAnime = await axios({
         method: "get",
-        url: "https://api.jikan.moe/v4/anime?sfw=true",
+        url: `https://api.jikan.moe/v4/anime?rating=g&rating=pg&rating=pg13`,
+        params: {
+          q: q,
+          page: page,
+        },
       });
 
-      //   console.log(getAnime.data);
+      // let filterAnime = getAnime.data.data.map((el) => {
+      //   if (
+      //     el.rating !== "R - 17+ (violence & profanity)" &&
+      //     el.rating !== "R+ - Mild Nudity" &&
+      //     el.rating !== "Rx - Hentai"
+      //   ) {
+      //     return el;
+      //   }
+      // });
+      // console.log(filterAnime.length);
       res.status(200).json({
-        data: getAnime.data,
+        pagination: getAnime.data,
       });
     } catch (error) {
-      //   console.log(error);
+      console.log(error);
       next(error);
     }
   }
@@ -203,7 +220,7 @@ class Controller {
         throw { name: "Not Found" };
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       next(error);
     }
   }
@@ -251,6 +268,27 @@ class Controller {
       });
     } catch (error) {
       // console.log(error, "??????????");
+      next(error);
+    }
+  }
+
+  static async deletePost(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const dlt = await postUser.destroy({
+        where: { id },
+      });
+
+      if (dlt <= 0) {
+        throw { name: "Not_Found" };
+      }
+
+      res.status(200).json({
+        message: `data with id ${id} success to delete`,
+      });
+    } catch (error) {
+      // console.log(error);
       next(error);
     }
   }
