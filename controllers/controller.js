@@ -292,6 +292,24 @@ class Controller {
       next(error);
     }
   }
+
+  static async postMulti(req, res, next) {
+    try {
+      console.log(req.files, "<<<<<<<");
+      let { buffer, originalname } = req.files;
+      for (let i = 0; i < req.files.length; i++) {
+        buffer.append(req.files[i].buffer);
+        originalname.append(req.files[i].originalname);
+      }
+
+      const result = await imageKit(buffer, originalname);
+      console.log(result, "========");
+      const imageUrl = result.data.url;
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
 }
 
 module.exports = Controller;

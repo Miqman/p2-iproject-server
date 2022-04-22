@@ -31,4 +31,6 @@ router.post("/profileAdd", upload.single("imageUrl"), Controller.postProfile);
 
 router.delete("/delete/:id", Controller.deletePost);
 
+router.post("/multifile", upload.array("imageUrl", 2), Controller.postMulti);
+
 module.exports = router;
