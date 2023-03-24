@@ -9,6 +9,14 @@ const upload = multer();
 // const upload = multer();
 // console.log(upload, "<<<<<<<<<");
 
+router.get("", (req, res) => {
+  res.status(200).json({
+    statusCode: 200,
+    message: "echo OK",
+    environmentSecret: process.env.SECRET ?? "Secret not Provided",
+  });
+});
+
 router.post("/register", Controller.register);
 
 router.post("/login", Controller.login);
